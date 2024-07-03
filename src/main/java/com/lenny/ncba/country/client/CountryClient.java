@@ -1,6 +1,8 @@
 package com.lenny.ncba.country.client;
 
 import com.lenny.ncba.wsdl.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
@@ -15,6 +17,8 @@ public class CountryClient extends WebServiceGatewaySupport {
     @Value("${country.info.service.base.url}")
     private String baseUrl;
 
+    Logger logger = LoggerFactory.getLogger(CountryClient.class);
+
     public String getCountryISOCode(String countryName) {
         try {
             CountryISOCode request = new CountryISOCode();
@@ -25,8 +29,11 @@ public class CountryClient extends WebServiceGatewaySupport {
             CountryISOCodeResponse countryISOCodeResponse = (CountryISOCodeResponse) getWebServiceTemplate()
                     .marshalSendAndReceive(serviceUri, request, soapActionCallback);
 
+            logger.info("Retrieved country iso code {} from name", countryISOCodeResponse.getCountryISOCodeResult());
+
             return countryISOCodeResponse.getCountryISOCodeResult();
         } catch (Exception e) {
+            logger.error("Error getting country ISO code", e);
             throw new RuntimeException(e);
         }
     }
@@ -41,8 +48,11 @@ public class CountryClient extends WebServiceGatewaySupport {
             FullCountryInfoResponse fullCountryInfoResponse = (FullCountryInfoResponse) getWebServiceTemplate()
                     .marshalSendAndReceive(serviceUri, request, soapActionCallback);
 
+            logger.info("Retrieved country information {}", fullCountryInfoResponse.getFullCountryInfoResult().getSName());
+
             return fullCountryInfoResponse.getFullCountryInfoResult();
         } catch (Exception e) {
+            logger.error("Error while getting country information", e);
             throw new RuntimeException(e);
         }
     }

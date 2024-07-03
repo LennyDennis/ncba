@@ -12,6 +12,8 @@ import com.lenny.ncba.shared.exceptions.InvalidInputException;
 import com.lenny.ncba.shared.exceptions.ResourceNotFoundException;
 import com.lenny.ncba.wsdl.TCountryInfo;
 import com.lenny.ncba.wsdl.TLanguage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +33,19 @@ public class CountryServiceImpl implements ICountryService{
     @Autowired
     private LanguageRepository languageRepository;
 
+    Logger logger = LoggerFactory.getLogger(CountryServiceImpl.class);
+
     @Override
     public CountryDto convertCountryNameToSentenceCase(CountryDto countryDto) {
         String countryName = countryDto.getName();
         String sentenceCaseCountryName = countryName.substring(0, 1).toUpperCase() + countryName.substring(1);
+        logger.info("Converted country name to sentence case {}", sentenceCaseCountryName);
         String countryIsoCode = countryClient.getCountryISOCode(sentenceCaseCountryName);
+        logger.info("Retrieved ISO code {}", countryIsoCode);
         TCountryInfo countryInfo = countryClient.getCountryInfo(countryIsoCode);
         CountryInfo savedCountry = saveCountry(countryInfo);
         List<Language> saveLanguages = saveLanguages(countryInfo, savedCountry);
+        logger.info("Saved country information for {}", sentenceCaseCountryName);
         return CountryMapper.mapCountryInfoToCountryDto(savedCountry, saveLanguages);
     }
 
