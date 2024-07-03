@@ -2,6 +2,7 @@ package com.lenny.ncba.country.service;
 
 import com.lenny.ncba.country.client.CountryClient;
 import com.lenny.ncba.country.dto.CountryDto;
+import com.lenny.ncba.country.dto.CountryReportDto;
 import com.lenny.ncba.country.entity.CountryInfo;
 import com.lenny.ncba.country.entity.Language;
 import com.lenny.ncba.country.mapper.CountryMapper;
@@ -15,6 +16,8 @@ import com.lenny.ncba.wsdl.TLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,10 +66,10 @@ public class CountryServiceImpl implements ICountryService{
     }
 
     @Override
-    public List<CountryDto> getAllCountries() {
-        List<CountryInfo> countryInfoList = countryRepository.findAll();
-        List<CountryDto> countryDtoList = countryInfoList.stream().map(CountryMapper::mapCountryInfoToCountryDto).collect(Collectors.toList());
-        return countryDtoList;
+    public CountryReportDto getAllCountries(int page, int size) {
+        Page<CountryInfo> countries = countryRepository.findAll(PageRequest.of(page, size));
+        List<CountryDto> countryDtoList = countries.getContent().stream().map(CountryMapper::mapCountryInfoToCountryDto).collect(Collectors.toList());
+        return new CountryReportDto(new CountryReportDto.PageInfo(countries.getNumber(), countries.getTotalPages()), countryDtoList);
     }
 
     @Override
